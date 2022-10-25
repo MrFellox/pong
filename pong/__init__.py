@@ -12,7 +12,7 @@ class Barrier:
         self.speed = 3
         self.x = x
         self.y = y
-        self.y = id
+        self.id = id
 
         # Size in pixels
         self.height = 120
@@ -23,27 +23,32 @@ class Barrier:
     def up(self) -> None:
         """Moves the barrier up"""
 
-        print("up")
         self.y -= self.speed
         self._update_rect()
 
     def down(self) -> None:
         """Moves the barrier down"""
 
-        print("down")
         self.y += self.speed
         self._update_rect()
 
     def _update_rect(self) -> None:
         """Updates the rect to be drawn on frame update."""
 
-        # if self.y < 0:
-        #     self.y = 0
+        if self.y < 0:
+            self.y = 0
 
-        # if self.y > 380:
-        #     self.y = 380
+        if self.y > 380:
+            self.y = 380
 
-        print("Updating y pos from", self.rect.y, "to", self.y)
+        # print(
+        #     "Updating y pos from Barrier with id",
+        #     self.id,
+        #     "from y",
+        #     self.rect.y,
+        #     "to y",
+        #     self.y,
+        # )
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
 
@@ -53,16 +58,20 @@ class Ball:
         self.y = y
         self.speed = 1.4
 
+        # Multiplier applied on every time the ball is hitted.
+        # This is done so it get's harder every time you hit the ball/
+        self.hit_multiplier = 1.15
+
         # * 0 = Down
         # * 1 = Up
         self.directions_y = [0, 1]
         self.direction_y = random.choice(self.directions_y)
 
-        self.directions_x = [0, 1]
-        self.direction_x = random.choice(self.directions_x)
-
         # * 0 = Left
         # * 1 = Right
+
+        self.directions_x = [0, 1]
+        self.direction_x = random.choice(self.directions_x)
 
         self.height = 35
         self.width = 35
@@ -73,15 +82,24 @@ class Ball:
     def hit_right(self):
         """The ball was hitted from the right (p2)."""
 
-        pass
+        self.direction_x = 0
+        self.direction_y = random.choice(self.directions_y)
+        self.speed *= self.hit_multiplier
+
+        self._update_rect()
 
     def hit_left(self):
         """The ball was hitted from the left (p1)."""
 
-        pass
+        self.direction_x = 1
+        self.direction_y = random.choice(self.directions_y)
+
+        self.speed *= self.hit_multiplier
+        self._update_rect()
 
     def serve(self):
         """Move the ball to start the match"""
+        pass
 
     def move(self):
         """Moves the ball according to the direction"""
@@ -112,7 +130,7 @@ class Ball:
     def _update_rect(self):
         """Updates the ball rect"""
 
-        print(self.x, self.y)
+        print(self.speed)
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
 
@@ -122,11 +140,14 @@ running = True
 
 clock = pygame.time.Clock()
 
+# TODO: Refactor the way of storing game elements?
 elements = []
 
 
 def game():
     # Start a window
+
+    #! Find a way of NOT using globals
     global running
     global elements
 
@@ -137,11 +158,11 @@ def game():
 
     w_width, w_height = pygame.display.get_window_size()
     print(w_width, w_height)
-    # p1 = Barrier(x=round(w_width / 2), y=round(w_height / 2), surface=screen)
+    ball = Ball(x=round(w_width / 2), y=round(w_height / 2))
+
     p1 = Barrier(x=45, y=round(w_height / 2.5), id=1)
     p2 = Barrier(x=w_width - 45, y=round(w_height / 2.5), id=2)
 
-    ball = Ball(x=round(w_width / 2), y=round(w_height / 2))
     elements.append(p1)
     elements.append(p2)
 
@@ -185,10 +206,27 @@ def game():
                 surface=screen, rect=element.rect, color=pygame.Color(255, 255, 255)
             )
 
+        # Check if ball is colliding with a barrier
+        # * Functions returns the index of the rectangle the ball is colliding with
+        collider = ball.rect.collidelist([p1.rect, p2.rect])
+
+        if collider == 0:
+            ball.hit_left()
+
+        elif collider == 1:
+            ball.hit_right()
+
+        # if not ball.rect.collidelist([p1.rect]):
+        #     ball.hit_left()
+
+        # elif not ball.rect.collidelist(p2.rect):
+        #     ball.hit_right()
+
         # Move the ball and draw it on screen
         ball.move()
 
         pygame.draw.rect(
             surface=screen, rect=ball.rect, color=pygame.Color(255, 255, 255)
         )
+
         pygame.display.flip()
