@@ -6,13 +6,13 @@ pygame.init()
 
 
 class Barrier:
-    def __init__(self, x: int, y: int, id: int):
+    def __init__(self, x: int, y: int):
         """Represents a barrier that a player can control."""
 
         self.speed = 3
         self.x = x
         self.y = y
-        self.id = id
+        self.score = 0
 
         # Size in pixels
         self.height = 120
@@ -130,7 +130,6 @@ class Ball:
     def _update_rect(self):
         """Updates the ball rect"""
 
-        print(self.speed)
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
 
@@ -158,10 +157,12 @@ def game():
 
     w_width, w_height = pygame.display.get_window_size()
     print(w_width, w_height)
+
     ball = Ball(x=round(w_width / 2), y=round(w_height / 2))
 
-    p1 = Barrier(x=45, y=round(w_height / 2.5), id=1)
-    p2 = Barrier(x=w_width - 45, y=round(w_height / 2.5), id=2)
+    player_start_pos = round(w_height / 2.5)
+    p1 = Barrier(x=45, y=player_start_pos)
+    p2 = Barrier(x=w_width - 45, y=player_start_pos)
 
     elements.append(p1)
     elements.append(p2)
@@ -224,6 +225,34 @@ def game():
 
         # Move the ball and draw it on screen
         ball.move()
+
+        # Check if ball is out of bounds
+
+        # Ball went pass player 1
+        # print(ball.x)
+        if ball.x < 0:
+            p2.score += 1
+            print("P2 scored!")
+            print(p1.score, "-", p2.score)
+
+            p1.y = player_start_pos
+            p2.y = player_start_pos
+            p1._update_rect()
+            p2._update_rect()
+
+            ball = Ball(x=round(w_width / 2), y=round(w_height / 2))
+
+        # Ball went pass player 2
+        elif ball.x > 800:
+            p1.score += 1
+            print("P1 scored!")
+            print(p1.score, "-", p2.score)
+            p1.y = player_start_pos
+            p2.y = player_start_pos
+
+            p1._update_rect()
+            p2._update_rect()
+            ball = Ball(x=round(w_width / 2), y=round(w_height / 2))
 
         pygame.draw.rect(
             surface=screen, rect=ball.rect, color=pygame.Color(255, 255, 255)
