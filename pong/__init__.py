@@ -57,6 +57,7 @@ class Ball:
         self.x = x
         self.y = y
         self.speed = 1.4
+        self.served = False
 
         # Multiplier applied on every time the ball is hitted.
         # This is done so it get's harder every time you hit the ball/
@@ -77,7 +78,6 @@ class Ball:
         self.width = 35
 
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
-        self.serve()
 
     def hit_right(self):
         """The ball was hitted from the right (p2)."""
@@ -97,10 +97,6 @@ class Ball:
         self.speed *= self.hit_multiplier
         self._update_rect()
 
-    def serve(self):
-        """Move the ball to start the match"""
-        pass
-
     def move(self):
         """Moves the ball according to the direction"""
 
@@ -112,18 +108,19 @@ class Ball:
         elif self.y > 450:
             self.direction_y = 1
 
-        # Move ball based on directions
-        if self.direction_y:
-            self.y -= self.speed
+        if self.served:
+            # Move ball based on directions
+            if self.direction_y:
+                self.y -= self.speed
 
-        else:
-            self.y += self.speed
+            else:
+                self.y += self.speed
 
-        if self.direction_x:
-            self.x += self.speed
+            if self.direction_x:
+                self.x += self.speed
 
-        else:
-            self.x -= self.speed
+            else:
+                self.x -= self.speed
 
         self._update_rect()
 
@@ -178,20 +175,24 @@ def game():
 
         keys = pygame.key.get_pressed()
 
-        # Player 1 inputs
-        if keys[pygame.K_w]:
-            elements[0].up()
+        if ball.served:
+            # Player 1 inputs
+            if keys[pygame.K_w]:
+                elements[0].up()
 
-        elif keys[pygame.K_s]:
-            elements[0].down()
+            elif keys[pygame.K_s]:
+                elements[0].down()
 
-        # Player 2 inputs
+            # Player 2 inputs
 
-        if keys[pygame.K_UP]:
-            elements[1].up()
+            if keys[pygame.K_UP]:
+                elements[1].up()
 
-        elif keys[pygame.K_DOWN]:
-            elements[1].down()
+            elif keys[pygame.K_DOWN]:
+                elements[1].down()
+
+        elif keys[pygame.K_SPACE]:
+            ball.served = True
 
         screen.fill(
             color=pygame.Color(
