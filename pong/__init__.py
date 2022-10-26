@@ -3,6 +3,7 @@ import pygame.locals as locals
 import random
 
 pygame.init()
+pygame.font.init()
 
 
 class Barrier:
@@ -170,6 +171,7 @@ def game():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                pygame.quit()
 
         # Get key inputs
 
@@ -259,4 +261,14 @@ def game():
             surface=screen, rect=ball.rect, color=pygame.Color(255, 255, 255)
         )
 
+        sc_font = pygame.font.Font(pygame.font.get_default_font(), 60)
+        sc_text = sc_font.render(
+            f"{p1.score} - {p2.score}",
+            True,
+            pygame.Color(255, 255, 255),
+            pygame.Color(0, 0, 0, 0),
+        )
+
+        screen.blit(sc_text, (round((w_width / 2.28)), 15))
+        pygame.display.set_caption(f"Pong by MrFellox | {round(clock.get_fps())}")
         pygame.display.flip()
